@@ -1,4 +1,17 @@
-
+class Wheel {
+  PVector posi;
+  PVector velo;
+  void Wheel(PVector posi_in, PVector velo_in) {
+    posi.x = posi_in.x;
+    posi.y = posi_in.y;
+    velo.x = velo_in.x;
+    velo.y = velo_in.y;
+  }
+  void step() {
+    posi.x += velo.x;
+    posi.y += velo.y;
+  }
+}
 
 class Photon {
   Photon(PGraphics lens_field_in) {
@@ -6,6 +19,14 @@ class Photon {
   }
   float v = 1;
   PGraphics lens_field;
+  
+  PVector velo = new PVector(random(-v, v), random(-v, v));
+  PVector base = new PVector(random(width), random(height));
+  PVector left_rotated = v_rotate(velo, PI / 2);
+  PVector right_rotate = v_rotate(velo, -PI / 2);
+  Wheel left = new Wheel(unit((base + velo).rotate(PI/2)) * dist /2,
+                         unit((base + velo).rotate(-PI/2)) * dist /2);
+  
   PVector posi = new PVector(random(width), random(height));
   PVector prev_posi = new PVector(posi.x, posi.y);
   PVector velo = new PVector(random(-v, v), random(-v, v));
@@ -31,9 +52,11 @@ class Photon {
     prev_posi.y = posi.y;
   }
   
-  void v_rotate(float shita) {
-    velo.x = velo.x * cos(shita) + velo.y * sin(shita);
-    velo.y = velo.y * -sin(shita) + velo.y * cos(shita);
+  PVector; v_rotate(PVector velo, float shita) {
+    PVector result = new PVector(
+    velo.x * cos(shita) + velo.y * sin(shita),
+    velo.y * -sin(shita) + velo.y * cos(shita));
+    return result;
   }
   
   float gray(color c) {
