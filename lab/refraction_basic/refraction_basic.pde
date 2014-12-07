@@ -1,4 +1,5 @@
 PVector surface_normal = new PVector(0, -1);
+float K = 1.5;
 class Photon {
   boolean go_flag = false;
   PVector posi = new PVector(0, 0);
@@ -7,6 +8,8 @@ class Photon {
                   (int)random(255),
                   (int)random(255));
   PVector prev = new PVector(0, 0);
+  PVector org_posi = new PVector(0, 0);
+  PVector org_velo = new PVector(0, 0);
   Photon(float x, float y) {
     posi.x = x;
     posi.y = y;
@@ -19,7 +22,7 @@ class Photon {
     }
     posi.x += velo.x;
     posi.y += velo.y;
-    if (posi.y > height / 2) {
+    if (prev.y < height / 2 && posi.y > height / 2) {
       refrection(surface_normal);
     }
     show();
@@ -30,7 +33,12 @@ class Photon {
     prev.x = posi.x;
     prev.y = posi.y;
   }
+
   void refrection(PVector surface_normal) {
+    float in_theta = PI - PVector.angleBetween(surface_normal, velo);
+    float out_theta = asin(sin(in_theta) / K); //sin(in_theta) / sin(out_theta) = K
+    velo.rotate(out_theta - in_theta);
+    println(out_theta);
   }
 }
 
@@ -45,7 +53,12 @@ void init_photons() {
                           center.y - radius * sin(theta));
     p.velo.x = -cos(theta);
     p.velo.y = sin(theta);
-    p.velo.setMag(1);
+    p.velo.setMag(10);
+    // keep original params
+    p.org_posi.x = p.posi.x;
+    p.org_posi.y = p.posi.y;
+    p.org_velo.x = p.velo.x;
+    p.org_velo.y = p.velo.y;
     photons.add(p);
   }
 }
@@ -76,7 +89,24 @@ void draw() {
 
 int cnt = 0;
 void keyPressed() {
-  println(photons.size());
   Photon p = photons.get(cnt++ % photons.size());
-  p.go_flag = !p.go_flag;
+  if (key == 'c') {
+    background(255);
+    for (Photon ps : photons) {
+      ps.posi.x = ps.org_posi.x;
+      ps.posi.y = ps.org_posi.y;
+      ps.velo.x = ps.org_velo.x;
+      ps.velo.y = ps.org_velo.y;
+    }
+  }else if (key == 'k') {
+    K += 0.5;
+  }else if (key == 'j') {
+    K -= 0.5;
+  }else {
+    p.go_flag = !p.go_flag;
+  }
+  println(K);
+}
+
+void mouseMoved() {
 }
