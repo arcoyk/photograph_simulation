@@ -78,6 +78,8 @@ void setup() {
 }
 
 void draw() {
+  fill(255, 255, 255, 50);
+  rect(0, 0, width, height);
   for (Photon p : photons) {
     p.step();
   }
@@ -93,6 +95,16 @@ void draw() {
        height / 2,
        width / 2 + surface_normal.x * 10,
        height / 2 + surface_normal.y * 10);
+  for (Photon ps : photons) {
+    if ( ps.posi.x < 0 || width < ps.posi.x || ps.posi.y < 0 || height < ps.posi.y) {
+      ps.posi.x = ps.org_posi.x;
+      ps.posi.y = ps.org_posi.y;
+      ps.prev.x = ps.posi.x;
+      ps.prev.y = ps.posi.y;
+      ps.velo.x = ps.org_velo.x;
+      ps.velo.y = ps.org_velo.y;
+    }
+  }
 }
 
 int cnt = 0;
@@ -100,12 +112,6 @@ void keyPressed() {
   Photon p = photons.get(cnt++ % photons.size());
   if (key == 'c') {
     background(255);
-    for (Photon ps : photons) {
-      ps.posi.x = ps.org_posi.x;
-      ps.posi.y = ps.org_posi.y;
-      ps.velo.x = ps.org_velo.x;
-      ps.velo.y = ps.org_velo.y;
-    }
   }else if (key == 'k') {
     K += 0.5;
   }else if (key == 'j') {
@@ -117,4 +123,6 @@ void keyPressed() {
 }
 
 void mouseMoved() {
+  surface_normal.x = mouseX - width / 2;
+  surface_normal.y = mouseY - height / 2;
 }
