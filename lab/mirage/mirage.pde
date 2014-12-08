@@ -1,7 +1,7 @@
 class Photon {
   PVector posi = new PVector(random(width), random(height));
   PVector velo = PVector.random2D();
-  color c = color(255, 0, 0);
+  color c = color(0, 255, 0);
   Photon(float x, float y, float vx, float vy) {
     posi.x = x;
     posi.y = y;
@@ -12,7 +12,7 @@ class Photon {
     float prev_dens = gray(field.get((int)posi.x, (int)posi.y));
     posi.add(velo);
     float dens = gray(field.get((int)posi.x, (int)posi.y));
-    velo.rotate(map(prev_dens - dens, -255, 255, -10, 10));
+    velo.rotate(map(prev_dens - dens, 255, -255, -10, 10));
   }
   void show() {
     step();
@@ -22,21 +22,31 @@ class Photon {
 }
 
 PGraphics field;
-Photon p;
+ArrayList<Photon> ps = new ArrayList<Photon>();
+
 void setup() {
   size(800, 800);
   field = createGraphics(width, height);
   field.beginDraw();
   field.background(255);
   field.endDraw();
-  gradField();
-  // rectField();
-  p = new Photon(0, height / 2, 1, 0);
+  // gradField();
+  rectField();
+  for (float i = 0; i < 2 * PI; i += PI / 8) {
+    Photon p = new Photon(width / 2 + width / 2 * cos(i),
+                          height / 2 + height / 2 * sin(i),
+                          0, 0);
+    p.velo = PVector.fromAngle(i + PI);
+    p.velo.setMag(0.001);
+    ps.add(p);
+  }
   image(field, 0, 0);
 }
 
 void draw() {
-  p.show();
+  for (Photon p : ps) {
+    p.show();
+  }
 }
 
 void gradField() {
@@ -58,4 +68,9 @@ void rectField() {
   field.fill(100);
   field.rect(field.width / 2, 0, field.width, field.height);
   field.endDraw();
+}
+
+int cnt = 0;
+void keyPressed() {
+  ps.get(++cnt).velo.setMag(1);
 }
