@@ -37,8 +37,16 @@ class Photon {
   void refrection(PVector surface_normal) {
     float in_theta = PI - PVector.angleBetween(surface_normal, velo);
     float out_theta = asin(sin(in_theta) / K); //sin(in_theta) / sin(out_theta) = K
-    velo.rotate(out_theta - in_theta);
-    println(out_theta);
+    println("IN:" + map(in_theta, 0, PI, 0, 180));
+    println("OUT:" + map(out_theta, 0, PI, 0, 180));
+    if (in_theta < out_theta) {
+      out_theta = PI - out_theta;
+    }
+    if (abs(velo.heading()) < PI / 2) {
+      velo.rotate(in_theta - out_theta);
+    }else {
+      velo.rotate(out_theta - in_theta);
+    }
   }
 }
 
@@ -53,7 +61,7 @@ void init_photons() {
                           center.y - radius * sin(theta));
     p.velo.x = -cos(theta);
     p.velo.y = sin(theta);
-    p.velo.setMag(10);
+    p.velo.setMag(5);
     // keep original params
     p.org_posi.x = p.posi.x;
     p.org_posi.y = p.posi.y;

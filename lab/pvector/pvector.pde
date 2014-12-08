@@ -1,32 +1,38 @@
 PVector v = new PVector(0, 0);
-PVector m = new PVector(0, 0);
-float x, y, xx, yy;
+PVector m = new PVector(100, 100);
+PVector c = new PVector(0, 0);
+
 void setup() {
-  size(1000, 1000);
-  background(255);
-  fill(0, 0, 255);
-  v = PVector.random2D();
-  v.setMag(random(500));
-  x = random(width);
-  y = random(height);
-  xx = random(width);
-  yy = random(height);
+  size(500, 500);
+  c.x = width / 2;
+  c.y = height / 2;
 }
 
 void draw() {
   background(255);
-  translate(width/2, height/2);
-  stroke(255, 0, 0);
-  ellipse(0, 0, 10, 10);
-  line(0, 0, v.x, v.y);
+  proc();
+  show_params();
   stroke(0, 255, 0);
-  ellipse(x, y, 10, 10);
-  m.x = mouseX - width / 2;
-  m.y = mouseY - height / 2;
-  line(0, 0, m.x, m.y);
-  text(m.heading() / ( 2 * PI) * 360, 0, 0);
+  vector_line(v);
+  stroke(255, 0, 0);
+  vector_line(m);
 }
 
-void keyPressed() {
-  noLoop();
+void proc() {
+  v.x = mouseX - c.x;
+  v.y = mouseY - c.y;
+  m.rotate(PI / 40);
+}
+
+void show_params() {
+  fill(0);
+  int offset = 50;
+  int i = 1;
+  text("angleBetween " + PVector.angleBetween(v, m), 20, offset * i++);
+  text("v mag " + v.mag(), 20, offset * i++);
+  text("m heaing " + m.heading(), 20, offset * i++);
+}
+
+void vector_line(PVector v) {
+  line(c.x, c.y, c.x + v.x, c.y + v.y);
 }
