@@ -1,7 +1,7 @@
 PVector surface_normal = new PVector(0, -1);
 float K = 1.5;
 class Photon {
-  boolean go_flag = false;
+  boolean go_flag = true;
   PVector posi = new PVector(0, 0);
   PVector velo = new PVector(0, 0);
   color c = color((int)random(255),
@@ -35,7 +35,13 @@ class Photon {
   }
 
   void refrection(PVector surface_normal) {
-    float in_theta = PI - PVector.angleBetween(surface_normal, velo);
+    float in_theta = 0;
+    float angle_between = PVector.angleBetween(surface_normal, velo);
+    if (angle_between > PI / 2) {
+      in_theta = PI - angle_between;
+    }else {
+      in_theta = angle_between;
+    }
     float out_theta = asin(sin(in_theta) / K); //sin(in_theta) / sin(out_theta) = K
     println("IN:" + map(in_theta, 0, PI, 0, 180));
     println("OUT:" + map(out_theta, 0, PI, 0, 180));
@@ -52,11 +58,11 @@ class Photon {
 
 ArrayList<Photon> photons = new ArrayList<Photon>();
 void init_photons() {
-  int amount = 10;
+  int amount = 50;
   PVector center = new PVector(width / 2, height /2);
   float radius = 200;
   for (int i = 0; i < amount; i++) {
-    float theta = PI / amount * i;
+    float theta = 2 * PI / amount * i;
     Photon p = new Photon(center.x + radius * cos(theta),
                           center.y - radius * sin(theta));
     p.velo.x = -cos(theta);
@@ -109,7 +115,6 @@ void draw() {
 
 int cnt = 0;
 void keyPressed() {
-  Photon p = photons.get(cnt++ % photons.size());
   if (key == 'c') {
     background(255);
   }else if (key == 'k') {
@@ -117,12 +122,23 @@ void keyPressed() {
   }else if (key == 'j') {
     K -= 0.5;
   }else {
-    p.go_flag = !p.go_flag;
   }
   println(K);
 }
 
 void mouseMoved() {
-  surface_normal.x = mouseX - width / 2;
-  surface_normal.y = mouseY - height / 2;
+  // surface_normal.x = mouseX - width / 2;
+  // surface_normal.y = mouseY - height / 2;
+}
+
+void mouseClicked() {
+  for (Photon ps : photons) {
+    ps.posi.x = mouseX;
+    ps.posi.y = mouseY;
+    ps.prev.x = ps.posi.x;
+    ps.prev.y = ps.posi.y;
+    ps.velo.x = width / 2 - mouseX;
+    ps.velo.y = height / 2 - mouseY;
+    ps.velo.setMag(10);
+  }
 }
