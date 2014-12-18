@@ -1,7 +1,7 @@
 PVector surface_normal = new PVector(0, -1);
-float K = 1.5;
+float K = 1.9;
 class Photon {
-  boolean go_flag = true;
+  boolean go_flag = false;
   PVector posi = new PVector(0, 0);
   PVector velo = new PVector(0, 0);
   color c = color((int)random(255),
@@ -24,6 +24,8 @@ class Photon {
     posi.y += velo.y;
     if (prev.y < height / 2 && posi.y > height / 2) {
       refrection(surface_normal);
+    } else if (posi.y < height / 2 && prev.y > height / 2) {
+      refrection(surface_normal);
     }
     show();
   }
@@ -35,30 +37,41 @@ class Photon {
   }
 
   void refrection(PVector surface_normal) {
+    int angle_class = 0;
+    float h = velo.heading();
+    if ( h < 0 ) {
+      h = 2 * PI + h;
+    }
+    if ( 0 <= h && h < PI / 2) {
+      angle_class = 0;
+    } else if ( PI / 2 <= h && h < PI) {
+      angle_class = 1;
+    } else if ( PI <= h && h < PI * (float)3 / 2) {
+      angle_class = 2;
+    } else if ( PI * (float)3 / 2 <= h && h < 2 * PI) {
+      angle_class = 3;
+    }
     float in_theta = 0;
-    float angle_between = PVector.angleBetween(surface_normal, velo);
-    if (angle_between > PI / 2) {
-      in_theta = PI - angle_between;
-    }else {
-      in_theta = angle_between;
+    
+    if (angle_class == 0 || angle_class == 1) {
+      in_theta = PI - PVector.angleBetween(surface_normal, velo);
+    } else {
+      in_theta = PVector.angleBetween(surface_normal, velo);
     }
-    float out_theta = asin(sin(in_theta) / K); //sin(in_theta) / sin(out_theta) = K
-    println("IN:" + map(in_theta, 0, PI, 0, 180));
-    println("OUT:" + map(out_theta, 0, PI, 0, 180));
-    if (in_theta < out_theta) {
-      out_theta = PI - out_theta;
-    }
-    if (abs(velo.heading()) < PI / 2) {
-      velo.rotate(in_theta - out_theta);
-    }else {
-      velo.rotate(out_theta - in_theta);
+    
+    float out_theta = asin(sin(in_theta) / K);    
+    float diff_theta = in_theta - out_theta;
+    if (angle_class == 0 || angle_class == 3) {
+      velo.rotate(diff_theta);
+    } else {
+      velo.rotate(-diff_theta);
     }
   }
 }
 
 ArrayList<Photon> photons = new ArrayList<Photon>();
 void init_photons() {
-  int amount = 50;
+  int amount = 1;
   PVector center = new PVector(width / 2, height /2);
   float radius = 200;
   for (int i = 0; i < amount; i++) {
@@ -102,13 +115,14 @@ void draw() {
        width / 2 + surface_normal.x * 10,
        height / 2 + surface_normal.y * 10);
   for (Photon ps : photons) {
-    if ( ps.posi.x < 0 || width < ps.posi.x || ps.posi.y < 0 || height < ps.posi.y) {
+    if ( PVector.dist(new PVector(width / 2, height / 2), ps.posi) > 500) {
       ps.posi.x = ps.org_posi.x;
       ps.posi.y = ps.org_posi.y;
       ps.prev.x = ps.posi.x;
       ps.prev.y = ps.posi.y;
       ps.velo.x = ps.org_velo.x;
       ps.velo.y = ps.org_velo.y;
+      ps.go_flag = false;
     }
   }
 }
@@ -140,5 +154,9 @@ void mouseClicked() {
     ps.velo.x = width / 2 - mouseX;
     ps.velo.y = height / 2 - mouseY;
     ps.velo.setMag(10);
+    ps.go_flag = true;
   }
+  
 }
+
+
